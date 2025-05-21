@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real Studios Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+      color: #000;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .dark-mode {
+      background-color: #121212;
+      color: #ffffff;
+    }
+    header {
+      background-color: #005bbb;
+      color: white;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .language-select, .theme-toggle {
+      margin-left: 10px;
+    }
+    #game-section, #end-section {
+      display: none;
+      padding: 20px;
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .box {
+      width: 100px;
+      height: 100px;
+      background-color: #005bbb;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      font-size: 24px;
+      border-radius: 8px;
+    }
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <button onclick="startGame()" id="play-btn">Play</button>
+      <select onchange="setLanguage(this.value)" class="language-select">
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="pl">Polski</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+    <button onclick="toggleTheme()" class="theme-toggle">🌓</button>
+  </header>
+
+  <div id="game-section">
+    <h2 id="click-instruction">Click 8 boxes to win. One hides a job app!</h2>
+    <div class="grid" id="grid"></div>
+    <p id="score">Wins: 0 | Losses: 0</p>
+  </div>
+
+  <div id="end-section">
+    <h2 id="result-msg"></h2>
+    <p id="score-again"></p>
+    <button onclick="restartGame()" id="restart-btn">Restart</button>
+  </div>
+
+  <div class="footer">
+    <p>Real Studios | <a href="https://discord.gg/tBx5ptkPUF" target="_blank">Contact Us</a></p>
+  </div>
+
+  <script>
+    const messages = {
+      en: { play: 'Play', restart: 'Restart', instruction: 'Click 8 boxes to win. One hides a job app!', win: 'You Win!', lose: 'You Lost! Get a job!', wins: 'Wins', losses: 'Losses' },
+      fr: { play: 'Jouer', restart: 'Redémarrer', instruction: 'Cliquez sur 8 cases sans postuler à un emploi!', win: 'Vous avez gagné!', lose: 'Perdu! Postulez maintenant!', wins: 'Gagnés', losses: 'Perdus' },
+      pl: { play: 'Graj', restart: 'Zagraj ponownie', instruction: 'Kliknij 8 pól, nie traf w ogłoszenie!', win: 'Wygrałeś!', lose: 'Przegrałeś! Idź do pracy!', wins: 'Wygrane', losses: 'Przegrane' },
+      es: { play: 'Jugar', restart: 'Reiniciar', instruction: 'Haz clic en 8 cuadros sin postularte!', win: '¡Ganaste!', lose: '¡Perdiste! ¡Consigue un trabajo!', wins: 'Ganadas', losses: 'Perdidas' }
+    };
+
+    let language = 'en';
+    let wins = parseInt(localStorage.getItem('wins') || 0);
+    let losses = parseInt(localStorage.getItem('losses') || 0);
+    let loseBox = -1;
+    let clicks = 0;
+
+    function setLanguage(lang) {
+      language = lang;
+      document.getElementById('play-btn').textContent = messages[language].play;
+      document.getElementById('restart-btn').textContent = messages[language].restart;
+      document.getElementById('click-instruction').textContent = messages[language].instruction;
+      updateScore();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    function updateScore() {
+      document.getElementById('score').textContent = `${messages[language].wins}: ${wins} | ${messages[language].losses}: ${losses}`;
+      document.getElementById('score-again').textContent = `${messages[language].wins}: ${wins} | ${messages[language].losses}: ${losses}`;
+    }
+
+    function startGame() {
+      document.getElementById('game-section').style.display = 'block';
+      document.getElementById('end-section').style.display = 'none';
+      document.getElementById('grid').innerHTML = '';
+      loseBox = Math.floor(Math.random() * 9);
+      clicks = 0;
+      for (let i = 0; i < 9; i++) {
+        const box = document.createElement('div');
+        box.className = 'box';
+        box.onclick = () => handleClick(i, box);
+        document.getElementById('grid').appendChild(box);
+      }
+      updateScore();
+    }
+
+    function handleClick(index, box) {
+      if (box.classList.contains('clicked')) return;
+      box.classList.add('clicked');
+      box.style.backgroundColor = '#333';
+      clicks++;
+      if (index === loseBox) {
+        losses++;
+        localStorage.setItem('losses', losses);
+        window.location.href = 'https://g.co/kgs/MNSuyrw';
+      } else if (clicks === 8) {
+        wins++;
+        localStorage.setItem('wins', wins);
+        document.getElementById('result-msg').textContent = messages[language].win;
+        document.getElementById('game-section').style.display = 'none';
+        document.getElementById('end-section').style.display = 'block';
+        updateScore();
+      }
+    }
+
+    function restartGame() {
+      startGame();
+    }
+
+    setLanguage(language);
+    updateScore();
+  </script>
+</body>
+</html>
